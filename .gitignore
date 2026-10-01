@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local user data, stream configurations and private stream keys
+data/
+*.log
+
+# Large binaries & downloads
+cloudflared.exe
+cloudflared
+*.zip
+*.tar.gz
+*.part
+*.mp4
+*.mkv
+*.flv
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

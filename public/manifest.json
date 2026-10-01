@@ -1,0 +1,9 @@
+{
+  "name": "YouTube Multi-Stream Manager",
+  "short_name": "YT Live App",
+  "description": "Ứng dụng quản lý Livestream YouTube đa luồng từ Google Drive",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#131a2a"
+}

@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Multi-Stream Manager — App & Web Online</title>
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: #131a2a;
+      --bg-card-hover: #182236;
+      --bg-input: #0e1422;
+      --border: #243049;
+      --border-focus: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --blue: #3b82f6;
+      --blue-hover: #2563eb;
+      --green: #10b981;
+      --green-hover: #059669;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      --danger: #f43f5e;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(19, 26, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 24px;
+    }
+
+    .header-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1360px;
+      margin: 20px auto;
+      padding: 0 24px 60px;
+    }
+
+    /* Guest / Shared Device Portal View */
+    .guest-portal {
+      max-width: 780px;
+      margin: 36px auto;
+      background: var(--bg-card);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      border-radius: 18px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+
+    .guest-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .guest-step-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+
+    /* Online Share Banner */
+    .share-banner {
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.35), rgba(19, 26, 42, 0.95));
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .share-banner-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .share-banner-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .share-url-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .share-url-pill {
+      background: #090d16;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #34d399;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 8px;
+      user-select: all;
+    }
+
+    .share-lan-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Stats Row */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .stat-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .stat-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+      border-radius: var(--radius);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .filter-tab.active {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+
+    .toolbar-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      transform: translateY(-1px);
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+    }
+    .btn-blue:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    .btn-success:hover:not(:disabled) {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #283548;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12.5px;
+      border-radius: 6px;
+    }
+
+    /* Stream Grid / Cards */
+    .streams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(410px, 1fr));
+      gap: 18px;
+    }
+
+    @media (max-width: 500px) {
+      .streams-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stream-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color 0.2s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stream-card.is-live {
+      border-color: rgba(16, 185, 129, 0.55);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.08);
+    }
+
+    .stream-card.is-downloading {
+      border-color: rgba(59, 130, 246, 0.55);
+    }
+
+    .stream-card.is-scheduled {
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .stream-card.is-error {
+      border-color: rgba(244, 63, 94, 0.55);
+    }
+
+    .stream-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stream-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    .stream-id-tag {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Status Pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-live {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-live .status-dot {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.4s infinite;
+    }
+
+    .status-starting,
+    .status-downloading {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    .status-starting .status-dot,
+    .status-downloading .status-dot {
+      background: #3b82f6;
+      animation: pulse 1s infinite;
+    }
+
+    .status-scheduled {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .status-scheduled .status-dot {
+      background: #f59e0b;
+    }
+
+    .status-stopped {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .status-stopped .status-dot {
+      background: #64748b;
+    }
+
+    .status-error {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+    .status-error .status-dot {
+      background: #f43f5e;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.2); }
+    }
+
+    /* Progress Bar Component */
+    .drive-progress-wrapper {
+      background: #0b111e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .drive-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      gap: 8px;
+    }
+
+    .drive-progress-title {
+      color: var(--text-primary);
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .drive-progress-pct {
+      font-family: 'Consolas', monospace;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 9px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.35s ease;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+
+    .progress-fill.completed {
+      background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .progress-fill.error {
+      background: #f43f5e;
+    }
+
+    .drive-progress-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Info Rows inside Card */
+    .info-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 12.5px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-val {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-family: 'Consolas', 'Monaco', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 230px;
+    }
+
+    /* Telemetry Grid inside Card */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .metric-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .metric-item-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .metric-item-val {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 2px;
+      font-family: 'Consolas', monospace;
+    }
+
+    .error-banner {
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-actions-left,
+    .card-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 520px;
+      margin: 0 auto 20px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 15, 0.78);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      animation: modalIn 0.18s ease-out;
+    }
+
+    .modal.modal-lg {
+      max-width: 820px;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      background: rgba(14, 20, 34, 0.6);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    /* Form Controls */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--border-focus);
+    }
+
+    .checkbox-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s;
+    }
+
+    .checkbox-card:hover {
+      border-color: #3b82f6;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 560px) {
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Quick schedule chips */
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+    .chip:hover {
+      color: var(--text-primary);
+      border-color: var(--blue);
+    }
+
+    /* Console Log Viewer */
+    .log-console {
+      background: #070a12;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      color: #a7f3d0;
+      height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .code-block {
+      background: #070a12;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'Consolas', monospace;
+      font-size: 12.5px;
+      color: #93c5fd;
+      overflow-x: auto;
+      margin-top: 6px;
+    }
+
+    .qr-box {
+      background: #ffffff;
+      padding: 14px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">▶</div>
+        <div>
+          <div class="brand-title">YouTube Multi-Stream Manager</div>
+          <div class="brand-sub" id="brandSubText">Chạy độc lập trên CPU/RAM từng máy tính — Livestream trực tiếp từ Google Drive</div>
+        </div>
+      </div>
+
+      <div class="header-actions" id="hostHeaderActions">
+        <button class="btn btn-blue btn-sm" onclick="openShareModal()">
+          🌍 Chia sẻ App cho máy khác
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="openVpsGuideModal()">
+          ☁️ Hướng dẫn VPS
+        </button>
+        <button class="btn btn-primary" onclick="openStreamModal()">
+          ＋ Thêm luồng
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================== -->
+  <!-- CỔNG DÀNH CHO MÁY ĐƯỢC SHARE (CHẠY ĐỘC LẬP TRÊN CPU/RAM MÁY NGƯỜI NHẬN) -->
+  <!-- ====================================================================== -->
+  <div id="guestPortalView" class="guest-portal">
+    <div class="guest-badge">🛡️ Chế độ Độc lập Tài nguyên — Không ăn CPU/RAM của máy chủ đã chia sẻ</div>
+    <h2 style="font-size: 24px; margin-bottom: 8px;">Khởi chạy YouTube Multi-Stream Manager trên Máy Tính Của Bạn</h2>
+    <p style="color: var(--text-secondary); font-size: 14.5px;">
+      Bạn đang mở đường link chia sẻ từ một máy khác. Để công cụ Livestream chạy bằng <strong>100% CPU, RAM và Mạng trên chính máy tính của bạn</strong> (hoàn toàn độc lập, không làm nặng máy của người chia sẻ), hãy chọn 1 trong 2 cách dưới đây:
+    </p>
+
+    <div class="guest-step-card">
+      <h3 style="color: #34d399; font-size: 16px; margin-bottom: 6px;">
+        Cách 1 (Khuyên dùng - 1 Click): Tải File Khởi Chạy Tự Động về máy này
+      </h3>
+      <p style="color: var(--text-secondary); font-size: 13.5px; margin-bottom: 14px;">
+        Nhấn nút bên dưới để tải file khởi chạy (<code>Mo-App-YouTube-Live-Tren-May-Nay.bat</code>) và mở lên. Máy của bạn sẽ tự động bật cửa sổ App & Web riêng tại <code>http://localhost:3000</code> trên chính CPU/RAM của bạn:
+      </p>
+      <a href="/download/Mo-App-YouTube-Live-Tren-May-Nay.bat" class="btn btn-primary" style="font-size: 15px; padding: 12px 22px;">
+        ⬇️ Tải & Mở App Trên Máy Tính Này (Dùng CPU/RAM Máy Bạn)
+      </a>
+    </div>
+
+    <div class="guest-step-card">
+      <h3 style="color: #60a5fa; font-size: 16px; margin-bottom: 6px;">
+        Cách 2: Chạy trực tiếp 1 dòng lệnh trên Windows PowerShell của máy bạn
+      </h3>
+      <p style="color: var(--text-secondary); font-size: 13.5px;">
+        Mở <strong>PowerShell</strong> trên máy tính của bạn, dán lệnh sau và nhấn Enter:
+      </p>
+      <div class="code-block" id="guestPowershellCmd">Đang tạo lệnh...</div>
+      <div style="margin-top: 10px;">
+        <button type="button" class="btn btn-blue btn-sm" onclick="copyGuestPowershellCmd()">
+          📋 Copy Lệnh Chạy Trên Máy Bạn
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <span style="font-size: 12.5px; color: var(--text-muted);">
+        Bạn là chủ của máy gốc và đang dùng điện thoại để kiểm tra máy ở nhà?
+      </span>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="unlockRemoteHostControl()">
+        🔑 Tôi là Chủ máy (Điều khiển máy gốc từ xa)
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content (Dành cho máy đang chạy App trực tiếp) -->
+  <main class="container" id="mainDashboardView">
+
+    <!-- Online Public Link & Multi-Device Sharing Banner -->
+    <div class="share-banner">
+      <div class="share-banner-left">
+        <div class="share-banner-title">
+          <span>🌍 Link Web Share cho người khác (Khi người khác mở link này sẽ tự cài & chạy bằng CPU/RAM của máy họ, KHÔNG ăn CPU/RAM máy bạn):</span>
+        </div>
+        <div class="share-url-box">
+          <span id="publicUrlDisplay" class="share-url-pill">⏳ Đang khởi tạo đường truyền Internet công khai...</span>
+          <button class="btn btn-blue btn-sm" onclick="copyPublicUrl()">📋 Copy Link Share</button>
+          <button class="btn btn-secondary btn-sm" onclick="openShareModal()">📦 Tùy chọn Chia sẻ & QR</button>
+          <button class="btn btn-secondary btn-sm" onclick="restartPublicTunnel()" title="Tạo lại đường dẫn Online mới">🔄 Đổi Link</button>
+        </div>
+        <div class="share-lan-text" id="lanUrlDisplay">
+          🛡️ Bảo vệ tài nguyên: <strong>Đang Bật</strong> (Máy khác mở link sẽ chạy trên CPU/RAM của chính máy đó)
+        </div>
+      </div>
+    </div>
+
+    <!-- System & Stream Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Luồng đang Live trên máy này</div>
+          <div class="stat-value" id="statLiveCount" style="color: #34d399;">0</div>
+          <div class="stat-meta" id="statTotalStreams">Tổng cộng: 0 luồng</div>
+        </div>
+        <div class="stat-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">📡</div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Luồng đang hẹn lịch</div>
+          <div class="stat-value" id="statScheduledCount" style="color: #fbbf24;">0</div>
+          <div class="stat-meta" id="statServerClock">Đồng hồ máy: --:--:--</div>
+        </div>
+        <div class="stat-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">⏰</div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">CPU / RAM Máy Đang Chạy</div>
+          <div class="stat-value" id="statRamUsage">--%</div>
+          <div class="stat-meta" id="statHardwareInfo">Đang tải thông tin...</div>
+        </div>
+        <div class="stat-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">🖥️</div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Bộ mã hóa FFmpeg & Google Drive</div>
+          <div class="stat-value" id="statFfmpegStatus" style="font-size: 18px; color: #34d399;">Sẵn sàng</div>
+          <div class="stat-meta">Chuẩn H.264 RTMP YouTube Live</div>
+        </div>
+        <div class="stat-badge" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">⚡</div>
+      </div>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="toolbar">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">Tất cả luồng</button>
+        <button class="filter-tab" data-filter="live" onclick="setFilter('live')">🔴 Đang Live</button>
+        <button class="filter-tab" data-filter="scheduled" onclick="setFilter('scheduled')">📅 Đã đặt lịch</button>
+        <button class="filter-tab" data-filter="stopped" onclick="setFilter('stopped')">⏹️ Đã dừng / Lỗi</button>
+      </div>
+
+      <div class="toolbar-buttons">
+        <button class="btn btn-success btn-sm" onclick="startAllStreams()">
+          ▶ Bắt đầu tất cả
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="stopAllStreams()">
+          ⏹ Hủy / Dừng tất cả
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openStreamModal()">
+          ＋ Thêm luồng mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Streams Container -->
+    <div id="streamsContainer" class="streams-grid"></div>
+  </main>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL: CHIA SẺ APP CHO MÁY KHÁC (CHẠY BẰNG CPU/RAM MÁY ĐƯỢC SHARE)      -->
+  <!-- ====================================================================== -->
+  <div id="shareModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">🌍 Chia sẻ Công cụ cho Người khác (Ăn CPU/RAM máy được share)</div>
+        <button class="modal-close" onclick="closeShareModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; padding: 10px 14px; border-radius: 10px; font-size: 13px; text-align: left;">
+          ✅ <strong>Đã bật Chế độ Tách biệt Tài nguyên:</strong> Khi bạn gửi Link bên dưới cho người khác, máy của họ sẽ tải bộ khởi chạy về chạy bằng <strong>chính CPU & RAM của máy họ</strong> — tuyệt đối không cắn ngầm CPU/RAM của máy bạn!
+        </div>
+
+        <div class="qr-box">
+          <img id="qrCodeImg" src="" alt="QR Code" style="width: 190px; height: 190px; display: block;" />
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">1. Link Web Share (Gửi cho người khác mở trên máy của họ):</label>
+          <div class="input-group">
+            <input type="text" id="modalPublicUrlInput" class="form-input" readonly />
+            <button type="button" class="btn btn-blue" onclick="copyPublicUrl()">📋 Copy Link</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">2. Hoặc gửi trực tiếp File Khởi Chạy Độc Lập (.bat) qua Zalo/Telegram:</label>
+          <a href="/download/Mo-App-YouTube-Live-Tren-May-Nay.bat" class="btn btn-success" style="width: 100%;">
+            ⬇️ Tải File "Mo-App-YouTube-Live-Tren-May-Nay.bat" để gửi cho bạn bè
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="restartPublicTunnel()">🔄 Tạo Link Share mới</button>
+        <button type="button" class="btn btn-primary" onclick="closeShareModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL: THÊM LUỒNG / CHỈNH SỬA LUỒNG                                    -->
+  <!-- ====================================================================== -->
+  <div id="streamModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="streamModalTitle">➕ Thêm luồng Livestream mới</div>
+        <button class="modal-close" onclick="closeStreamModal()">&times;</button>
+      </div>
+
+      <form id="streamForm" onsubmit="handleSaveStream(event)">
+        <div class="modal-body">
+          <input type="hidden" id="streamIdInput" />
+
+          <!-- 1. Đặt tên luồng -->
+          <div class="form-group">
+            <label class="form-label" for="streamNameInput">
+              <span>1. Đặt tên luồng <span style="color: var(--accent);">*</span></span>
+            </label>
+            <input
+              type="text"
+              id="streamNameInput"
+              class="form-input"
+              placeholder="VD: Luồng 1 - Nhạc Lofi Chill 24/7"
+              required
+            />
+          </div>
+
+          <!-- 2. Mã luồng (Stream Key) -->
+          <div class="form-group">
+            <label class="form-label" for="streamKeyInput">
+              <span>2. Mã luồng (YouTube Stream Key) <span style="color: var(--accent);">*</span></span>
+              <span style="font-size: 11.5px; color: #60a5fa; cursor: pointer;" onclick="toggleRtmpAdvanced()">
+                ⚙️ Đổi URL RTMP
+              </span>
+            </label>
+            <div class="input-group">
+              <input
+                type="password"
+                id="streamKeyInput"
+                class="form-input"
+                placeholder="VD: 7mwb-8rvs-k128-h4rg-dc15 (Lấy trong YouTube Studio)"
+                required
+              />
+              <button type="button" class="btn btn-secondary" onclick="toggleStreamKeyVisibility()">
+                👁️ Hiện/Ẩn
+              </button>
+            </div>
+            <div id="rtmpUrlContainer" style="display: none; margin-top: 6px;">
+              <input
+                type="text"
+                id="rtmpUrlInput"
+                class="form-input"
+                value="rtmp://a.rtmp.youtube.com/live2"
+                placeholder="rtmp://a.rtmp.youtube.com/live2"
+              />
+              <div class="form-hint">Mặc định máy chủ YouTube Live: rtmp://a.rtmp.youtube.com/live2</div>
+            </div>
+          </div>
+
+          <!-- 3. Link Driver + Thanh hoàn tất tải video Driver -->
+          <div class="form-group">
+            <label class="form-label" for="driveLinkInput">
+              <span>3. Link Driver (Google Drive) <span style="color: var(--accent);">*</span></span>
+            </label>
+            <div class="input-group">
+              <input
+                type="text"
+                id="driveLinkInput"
+                class="form-input"
+                placeholder="Dán link Google Drive (https://drive.google.com/file/d/.../view)"
+                oninput="onDriveLinkInputChange()"
+                required
+              />
+              <button type="button" id="btnCheckDrive" class="btn btn-secondary" onclick="triggerModalDriveDownload()">
+                📥 Tải Video Drive
+              </button>
+            </div>
+            <div class="form-hint">
+              Hệ thống tự động nhận diện Link Google Drive và tải video kèm thanh tiến trình hoàn tất bên dưới.
+            </div>
+
+            <!-- Thanh hoàn tất tải video Driver ngay trong Modal -->
+            <div id="modalDriveProgressBox" class="drive-progress-wrapper" style="display: none; margin-top: 6px;">
+              <div class="drive-progress-header">
+                <span class="drive-progress-title" id="modalDriveFileName">Đang kết nối Google Drive...</span>
+                <span class="drive-progress-pct" id="modalDrivePct" style="color: #60a5fa;">0%</span>
+              </div>
+              <div class="progress-track">
+                <div id="modalDriveFill" class="progress-fill" style="width: 0%;"></div>
+              </div>
+              <div class="drive-progress-sub">
+                <span id="modalDriveStatusText">Đang chuẩn bị tải luồng dữ liệu từ Google Drive...</span>
+                <span id="modalDriveSizeText">0.00 MB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Ô tích Loop video lặp lại -->
+          <label class="checkbox-card" for="loopCheckbox">
+            <input type="checkbox" id="loopCheckbox" checked />
+            <div>
+              <div style="font-weight: 600; font-size: 14px;">4. Loop video lặp lại liên tục</div>
+              <div class="form-hint">
+                Tự động phát lặp lại video từ đầu khi kết thúc (Giữ luồng live liên tục không bị ngắt).
+              </div>
+            </div>
+          </label>
+
+          <!-- 5. Thời lượng live video (= 0 nếu muốn live mãi không dừng) -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="durationInput">
+                <span>5. Thời lượng live video</span>
+              </label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="durationInput"
+                  class="form-input"
+                  min="0"
+                  step="1"
+                  value="0"
+                  required
+                />
+                <select id="durationUnitInput" class="form-select" style="max-width: 115px;">
+                  <option value="minutes">Phút</option>
+                  <option value="hours">Giờ</option>
+                  <option value="seconds">Giây</option>
+                </select>
+              </div>
+              <div class="form-hint" style="color: #34d399; font-weight: 500;">
+                💡 Để <strong>= 0</strong> nếu muốn live mãi không dừng (24/7).
+              </div>
+            </div>
+
+            <!-- 6. Đặt lịch live -->
+            <div class="form-group">
+              <label class="form-label" for="scheduledAtInput">
+                <span>6. Đặt lịch live (Hẹn giờ phát)</span>
+              </label>
+              <input
+                type="datetime-local"
+                id="scheduledAtInput"
+                class="form-input"
+              />
+              <div class="quick-chips">
+                <button type="button" class="chip" onclick="setQuickSchedule(0)">Phát ngay</button>
+                <button type="button" class="chip" onclick="setQuickSchedule(15)">+15 phút</button>
+                <button type="button" class="chip" onclick="setQuickSchedule(60)">+1 giờ</button>
+                <button type="button" class="chip" onclick="setQuickSchedule(180)">+3 giờ</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tùy chọn chế độ nén (Chuẩn hóa H.264 vs Copy) -->
+          <div class="form-group">
+            <label class="form-label" for="encodeModeInput">
+              <span>Chế độ đồng bộ YouTube Live RTMP</span>
+            </label>
+            <select id="encodeModeInput" class="form-select">
+              <option value="transcode">✅ Chuẩn hóa H.264 (Khuyên dùng — Tương thích 100% mọi video Facebook/VP9/Drive)</option>
+              <option value="copy_explicit">⚡ Copy Stream gốc (-c:v copy) — Chỉ dùng khi video gốc đã chuẩn H.264 CBR</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 7. Nút Bắt đầu và Hủy -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeStreamModal()">
+            ✖ Hủy
+          </button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitStream">
+            ▶ Bắt đầu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL: XEM LOG FFMPEG TRỰC TIẾP                                        -->
+  <!-- ====================================================================== -->
+  <div id="logModalBackdrop" class="modal-backdrop">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title" id="logModalTitle">📜 Nhật ký FFmpeg trực tiếp</div>
+        <button class="modal-close" onclick="closeLogModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="logConsoleOutput" class="log-console">Đang tải log...</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="refreshCurrentLogs()">🔄 Làm mới</button>
+        <button type="button" class="btn btn-primary" onclick="closeLogModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL: HƯỚNG DẪN TẠO MÁY ẢO (VPS UBUNTU / WINDOWS / DOCKER)            -->
+  <!-- ====================================================================== -->
+  <div id="vpsModalBackdrop" class="modal-backdrop">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">☁️ Hướng dẫn Tạo Máy Ảo (VPS / Docker) để Livestream 24/7</div>
+        <button class="modal-close" onclick="closeVpsGuideModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 13.5px; line-height: 1.6;">
+        <p>
+          Để hệ thống chạy <strong>nhiều luồng song song 24/7</strong> kể cả khi bạn tắt máy tính cá nhân, bạn có thể triển khai bộ công cụ này lên <strong>Máy ảo (VPS Ubuntu / Windows)</strong> hoặc <strong>Docker</strong>:
+        </p>
+
+        <div style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+          <h4 style="color: #60a5fa; margin-bottom: 6px;">Cách 1: Khởi tạo Máy ảo Linux (Ubuntu 22.04 / 24.04 VPS) — Nhẹ & Ổn định nhất</h4>
+          <p style="color: var(--text-secondary);">
+            Thuê 1 VPS Ubuntu (từ 2 CPU / 2GB RAM trở lên). Copy thư mục dự án lên VPS và chạy lệnh tự động:
+          </p>
+          <div class="code-block">chmod +x setup-vps-ubuntu.sh && ./setup-vps-ubuntu.sh</div>
+        </div>
+
+        <div style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+          <h4 style="color: #34d399; margin-bottom: 6px;">Cách 2: Chạy bằng Docker Container (1 lệnh duy nhất)</h4>
+          <div class="code-block">docker compose up -d --build</div>
+        </div>
+
+        <div style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+          <h4 style="color: #fbbf24; margin-bottom: 6px;">Cách 3: Mở App trực tiếp trên màn hình Desktop Windows</h4>
+          <p style="color: var(--text-secondary);">
+            Nhấp đúp vào biểu tượng <strong>"YouTube Live Manager"</strong> ngoài màn hình Desktop (hoặc file <code>Open-Desktop-App.vbs</code>) để mở cửa sổ phần mềm độc lập.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeVpsGuideModal()">Đã hiểu</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allStreams = [];
+    let currentFilter = 'all';
+    let activeLogStreamId = null;
+    let logPollInterval = null;
+    let visibleKeys = new Set();
+    let hostControlUnlocked = localStorage.getItem('yt_host_unlocked') === 'true';
+
+    let currentShareInfo = {
+      localUrl: window.location.origin,
+      lanUrls: [],
+      publicUrl: null,
+      tunnelStatus: 'starting'
+    };
+
+    let modalDrivePollTimer = null;
+    let modalCurrentFileId = null;
+    let driveInputDebounce = null;
+
+    function getApiHeaders(extra = {}) {
+      const headers = { ...extra };
+      if (hostControlUnlocked) {
+        headers['x-host-unlock'] = 'allow-host-control';
+      }
+      return headers;
+    }
+
+    function unlockRemoteHostControl() {
+      if (confirm('Bạn xác nhận mình là Chủ máy và muốn điều khiển trực tiếp CPU/RAM của máy chủ gốc từ thiết bị này?')) {
+        hostControlUnlocked = true;
+        localStorage.setItem('yt_host_unlocked', 'true');
+        fetchDashboardData();
+      }
+    }
+
+    function copyGuestPowershellCmd() {
+      const cmd = `irm '${window.location.origin}/download/install.ps1' | iex`;
+      navigator.clipboard.writeText(cmd);
+      alert('✅ Đã copy lệnh! Hãy mở PowerShell trên máy tính của bạn, dán lệnh vào và nhấn Enter để chạy App bằng CPU/RAM máy bạn.');
+    }
+
+    function formatSeconds(sec) {
+      if (sec === null || sec === undefined || isNaN(sec)) return '--:--:--';
+      const s = Math.max(0, Math.floor(sec));
+      const hrs = Math.floor(s / 3600);
+      const mins = Math.floor((s % 3600) / 60);
+      const secs = s % 60;
+      return [hrs, mins, secs].map(v => String(v).padStart(2, '0')).join(':');
+    }
+
+    function formatDurationConfig(stream) {
+      if (!stream.duration || Number(stream.duration) === 0) {
+        return '∞ Live mãi không dừng (= 0)';
+      }
+      const unitMap = { minutes: 'phút', hours: 'giờ', seconds: 'giây' };
+      return `${stream.duration} ${unitMap[stream.durationUnit] || 'phút'}`;
+    }
+
+    async function fetchDashboardData() {
+      try {
+        const [statusRes, streamsRes] = await Promise.all([
+          fetch('/api/status', { headers: getApiHeaders() }),
+          fetch('/api/streams', { headers: getApiHeaders() })
+        ]);
+
+        if (statusRes.ok) {
+          const st = await statusRes.json();
+
+          // If viewer is on another device (remote link) and hasn't unlocked host control,
+          // show the Standalone Client Setup Portal so it runs on THEIR CPU/RAM!
+          const guestPortal = document.getElementById('guestPortalView');
+          const mainDash = document.getElementById('mainDashboardView');
+          const headerActions = document.getElementById('hostHeaderActions');
+
+          if (!st.isLocalHostViewer && !hostControlUnlocked) {
+            guestPortal.style.display = 'block';
+            mainDash.style.display = 'none';
+            headerActions.style.display = 'none';
+            document.getElementById('guestPowershellCmd').textContent =
+              `irm '${window.location.origin}/download/install.ps1' | iex`;
+            return;
+          } else {
+            guestPortal.style.display = 'none';
+            mainDash.style.display = 'block';
+            headerActions.style.display = 'flex';
+          }
+
+          document.getElementById('statLiveCount').textContent = st.liveCount;
+          document.getElementById('statScheduledCount').textContent = st.scheduledCount;
+          document.getElementById('statTotalStreams').textContent = `Tổng cộng: ${st.totalStreams} luồng`;
+          document.getElementById('statServerClock').textContent =
+            `Giờ máy (${st.hostname || 'Local'}): ${new Date(st.serverTime).toLocaleTimeString('vi-VN', { hour12: false })}`;
+          document.getElementById('statRamUsage').textContent = `${st.memoryPercent}% RAM`;
+          document.getElementById('statHardwareInfo').textContent =
+            `${st.cpuCores} Cores • ${st.memoryUsedGB}/${st.memoryTotalGB} GB`;
+          document.getElementById('statFfmpegStatus').textContent =
+            st.ffmpegReady ? 'FFmpeg Sẵn sàng' : 'Thiếu FFmpeg';
+
+          if (st.share) {
+            currentShareInfo = st.share;
+            updateShareBannerUI();
+          }
+        }
+
+        if (streamsRes.ok) {
+          allStreams = await streamsRes.json();
+          renderStreams();
+        }
+      } catch (err) {
+        console.error('Lỗi tải dữ liệu dashboard:', err);
+      }
+    }
+
+    function updateShareBannerUI() {
+      const pubEl = document.getElementById('publicUrlDisplay');
+      const modalPub = document.getElementById('modalPublicUrlInput');
+      const qrImg = document.getElementById('qrCodeImg');
+
+      if (currentShareInfo.publicUrl) {
+        pubEl.textContent = currentShareInfo.publicUrl;
+        pubEl.style.color = '#34d399';
+        if (modalPub) modalPub.value = currentShareInfo.publicUrl;
+        if (qrImg) {
+          const targetQr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentShareInfo.publicUrl)}`;
+          if (qrImg.src !== targetQr) qrImg.src = targetQr;
+        }
+      } else if (currentShareInfo.tunnelStatus === 'starting') {
+        pubEl.textContent = '⏳ Đang khởi tạo Link Web Share công khai...';
+        pubEl.style.color = '#fbbf24';
+      } else {
+        const fallback = currentShareInfo.lanUrls[0] || currentShareInfo.localUrl;
+        pubEl.textContent = fallback;
+        if (modalPub) modalPub.value = fallback;
+      }
+    }
+
+    function copyPublicUrl() {
+      const url = currentShareInfo.publicUrl || currentShareInfo.lanUrls[0] || window.location.origin;
+      navigator.clipboard.writeText(url);
+      alert(`✅ Đã copy Link Chia sẻ:\n${url}\n\nKhi người khác mở link này trên máy của họ, công cụ sẽ tự cài và ăn CPU/RAM của máy người đó (không ăn CPU/RAM của máy bạn)!`);
+    }
+
+    async function restartPublicTunnel() {
+      document.getElementById('publicUrlDisplay').textContent = '⏳ Đang tạo lại Link Web Share mới...';
+      await fetch('/api/share/restart-tunnel', { method: 'POST', headers: getApiHeaders() });
+      setTimeout(fetchDashboardData, 1500);
+    }
+
+    function openShareModal() {
+      updateShareBannerUI();
+      document.getElementById('shareModalBackdrop').classList.add('open');
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModalBackdrop').classList.remove('open');
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderStreams();
+    }
+
+    function toggleCardKey(id) {
+      if (visibleKeys.has(id)) {
+        visibleKeys.delete(id);
+      } else {
+        visibleKeys.add(id);
+      }
+      renderStreams();
+    }
+
+    function maskStreamKey(key) {
+      if (!key) return '';
+      if (key.length <= 6) return '••••••';
+      return key.slice(0, 4) + '••••••••' + key.slice(-4);
+    }
+
+    function getStatusBadgeHtml(stream) {
+      switch (stream.status) {
+        case 'live':
+          return `<span class="status-pill status-live"><span class="status-dot"></span>ĐANG LIVE YOUTUBE</span>`;
+        case 'downloading': {
+          const pct = stream.downloadInfo ? stream.downloadInfo.progress : 0;
+          return `<span class="status-pill status-downloading"><span class="status-dot"></span>ĐANG TẢI DRIVE (${pct}%)</span>`;
+        }
+        case 'starting':
+          return `<span class="status-pill status-starting"><span class="status-dot"></span>KẾT NỐI YOUTUBE...</span>`;
+        case 'scheduled':
+          return `<span class="status-pill status-scheduled"><span class="status-dot"></span>HẸN GIỜ</span>`;
+        case 'error':
+          return `<span class="status-pill status-error"><span class="status-dot"></span>LỖI LUỒNG</span>`;
+        default:
+          return `<span class="status-pill status-stopped"><span class="status-dot"></span>ĐÃ DỪNG</span>`;
+      }
+    }
+
+    function renderDriveProgressForCard(stream) {
+      const dl = stream.downloadInfo;
+      if (!dl) return '';
+
+      const pct = dl.progress || 0;
+      const isDone = dl.status === 'completed';
+      const isErr = dl.status === 'error';
+      const fillClass = isDone ? 'completed' : isErr ? 'error' : '';
+      const pctColor = isDone ? '#34d399' : isErr ? '#fb7185' : '#60a5fa';
+
+      const statusText = isDone
+        ? '✅ Đã tải hoàn tất 100% video từ Google Drive'
+        : isErr
+        ? `❌ ${dl.error || 'Lỗi tải video'}`
+        : '📥 Đang tải video từ Google Drive về máy...';
+
+      const sizeText = dl.totalMB
+        ? `${dl.downloadedMB} / ${dl.totalMB} MB`
+        : `${dl.downloadedMB || '0.00'} MB`;
+
+      return `
+        <div class="drive-progress-wrapper">
+          <div class="drive-progress-header">
+            <span class="drive-progress-title" title="${escapeHtml(dl.fileName)}">
+              🎬 ${escapeHtml(dl.fileName || 'Video Google Drive')}
+            </span>
+            <span class="drive-progress-pct" style="color: ${pctColor};">${pct}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill ${fillClass}" style="width: ${pct}%;"></div>
+          </div>
+          <div class="drive-progress-sub">
+            <span>${escapeHtml(statusText)}</span>
+            <span>${escapeHtml(sizeText)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStreams() {
+      const container = document.getElementById('streamsContainer');
+      const filtered = allStreams.filter(s => {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'live') {
+          return s.status === 'live' || s.status === 'starting' || s.status === 'downloading';
+        }
+        if (currentFilter === 'scheduled') return s.status === 'scheduled';
+        if (currentFilter === 'stopped') return s.status === 'stopped' || s.status === 'error';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <div class="empty-title">Chưa có luồng Livestream nào trong mục này</div>
+            <div class="empty-desc">
+              Nhấn nút <strong>"＋ Thêm luồng"</strong> để dán link video từ Google Drive, xem thanh hoàn tất tải video và phát trực tiếp lên YouTube.
+            </div>
+            <button class="btn btn-primary" onclick="openStreamModal()">＋ Thêm luồng đầu tiên</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(stream => {
+        const isRunning =
+          stream.status === 'live' || stream.status === 'starting' || stream.status === 'downloading';
+        const isScheduled = stream.status === 'scheduled';
+        const cardClass =
+          stream.status === 'live'
+            ? 'is-live'
+            : stream.status === 'downloading'
+            ? 'is-downloading'
+            : isScheduled
+            ? 'is-scheduled'
+            : stream.status === 'error'
+            ? 'is-error'
+            : '';
+
+        const keyShown = visibleKeys.has(stream.id);
+        const displayKey = keyShown ? stream.streamKey : maskStreamKey(stream.streamKey);
+
+        let scheduleHtml = '';
+        if (stream.scheduledAt) {
+          const schedDate = new Date(stream.scheduledAt);
+          const diffSec = Math.max(0, Math.floor((schedDate.getTime() - Date.now()) / 1000));
+          scheduleHtml = `
+            <div class="info-row">
+              <span class="info-label">📅 Lịch hẹn:</span>
+              <span class="info-val" style="color: #fbbf24;">
+                ${schedDate.toLocaleString('vi-VN')} ${isScheduled ? `(Còn ${formatSeconds(diffSec)})` : ''}
+              </span>
+            </div>
+          `;
+        }
+
+        const remainingLabel = stream.durationSeconds > 0
+          ? (isRunning ? `Còn ${formatSeconds(stream.remainingSeconds)}` : formatDurationConfig(stream))
+          : '∞ Mãi mãi (= 0)';
+
+        return `
+          <div class="stream-card ${cardClass}">
+            <div class="stream-header">
+              <div>
+                <div class="stream-title">${escapeHtml(stream.name)}</div>
+                <div class="stream-id-tag">
+                  Chuẩn phát: ${stream.encodeMode === 'copy_explicit' ? 'Copy Stream' : 'Chuẩn hóa YouTube H.264'}
+                </div>
+              </div>
+              ${getStatusBadgeHtml(stream)}
+            </div>
+
+            ${renderDriveProgressForCard(stream)}
+
+            <div class="info-box">
+              <div class="info-row">
+                <span class="info-label">🔑 Mã luồng:</span>
+                <span class="info-val" style="cursor: pointer;" onclick="toggleCardKey('${stream.id}')" title="Nhấn để hiện/ẩn mã luồng">
+                  ${escapeHtml(displayKey)} ${keyShown ? '🙈' : '👁️'}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">☁️ Mã File Drive:</span>
+                <span class="info-val" title="${escapeHtml(stream.driveLink)}">
+                  ${stream.fileId ? escapeHtml(stream.fileId) : escapeHtml(stream.driveLink)}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">🔁 Lặp lại (Loop):</span>
+                <span class="info-val" style="color: ${stream.loop ? '#34d399' : '#94a3b8'};">
+                  ${stream.loop ? `☑ Bật lặp lại ${stream.loopCount > 0 ? `(Đã lặp ${stream.loopCount} lần)` : ''}` : '☐ Không lặp'}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">⏱️ Thời lượng live:</span>
+                <span class="info-val" style="color: #60a5fa;">${remainingLabel}</span>
+              </div>
+              ${scheduleHtml}
+            </div>
+
+            <div class="metrics-bar">
+              <div class="metric-item">
+                <div class="metric-item-label">Đã phát (Uptime)</div>
+                <div class="metric-item-val">${isRunning ? formatSeconds(stream.elapsedSeconds) : '00:00:00'}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-item-label">Khung hình / Tốc độ</div>
+                <div class="metric-item-val">${stream.fps} fps (${stream.speed})</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-item-label">Băng thông</div>
+                <div class="metric-item-val">${stream.bitrate}</div>
+              </div>
+            </div>
+
+            ${stream.error ? `<div class="error-banner">⚠️ ${escapeHtml(stream.error)}</div>` : ''}
+
+            <div class="card-actions">
+              <div class="card-actions-left">
+                ${
+                  isRunning
+                    ? `<button class="btn btn-danger btn-sm" onclick="stopStream('${stream.id}')">⏹ Hủy / Dừng</button>`
+                    : isScheduled
+                    ? `
+                      <button class="btn btn-success btn-sm" onclick="startStream('${stream.id}')">▶ Phát ngay</button>
+                      <button class="btn btn-danger btn-sm" onclick="stopStream('${stream.id}')">✖ Hủy lịch</button>
+                    `
+                    : `<button class="btn btn-success btn-sm" onclick="startStream('${stream.id}')">▶ Bắt đầu</button>`
+                }
+              </div>
+
+              <div class="card-actions-right">
+                <button class="btn btn-secondary btn-sm" onclick="openLogModal('${stream.id}', '${escapeJs(stream.name)}')" title="Xem nhật ký FFmpeg">
+                  📜 Log
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="openEditStreamModal('${stream.id}')" title="Sửa cấu hình luồng">
+                  ✏️ Sửa
+                </button>
+                <button class="btn btn-secondary btn-sm" style="color: #fb7185;" onclick="deleteStream('${stream.id}')" title="Xóa luồng">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    // ========================================================================
+    // MODAL GOOGLE DRIVE PROGRESS BAR
+    // ========================================================================
+
+    function onDriveLinkInputChange() {
+      if (driveInputDebounce) clearTimeout(driveInputDebounce);
+      const val = document.getElementById('driveLinkInput').value.trim();
+      if (!val) {
+        stopModalDrivePolling();
+        document.getElementById('modalDriveProgressBox').style.display = 'none';
+        return;
+      }
+      driveInputDebounce = setTimeout(() => {
+        triggerModalDriveDownload();
+      }, 350);
+    }
+
+    async function triggerModalDriveDownload() {
+      const link = document.getElementById('driveLinkInput').value.trim();
+      const box = document.getElementById('modalDriveProgressBox');
+      if (!link) return;
+
+      box.style.display = 'flex';
+      document.getElementById('modalDriveFileName').textContent = '🔍 Đang nhận diện Link Google Drive...';
+      document.getElementById('modalDrivePct').textContent = '0%';
+      document.getElementById('modalDriveFill').className = 'progress-fill';
+      document.getElementById('modalDriveFill').style.width = '5%';
+      document.getElementById('modalDriveStatusText').textContent = 'Đang kết nối tới máy chủ Google Drive...';
+      document.getElementById('modalDriveSizeText').textContent = '';
+
+      try {
+        const res = await fetch('/api/drive-download', {
+          method: 'POST',
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ link })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          stopModalDrivePolling();
+          updateModalProgressUI({
+            status: 'error',
+            progress: 100,
+            fileName: 'Link không hợp lệ',
+            error: data.error || 'Không nhận diện được link Google Drive.'
+          });
+          return;
+        }
+
+        modalCurrentFileId = data.fileId;
+        updateModalProgressUI(data);
+
+        stopModalDrivePolling();
+        if (data.status === 'downloading') {
+          modalDrivePollTimer = setInterval(pollModalDriveStatus, 500);
+        }
+      } catch (err) {
+        updateModalProgressUI({
+          status: 'error',
+          progress: 100,
+          fileName: 'Lỗi kết nối',
+          error: err.message
+        });
+      }
+    }
+
+    async function pollModalDriveStatus() {
+      if (!modalCurrentFileId) return;
+      try {
+        const res = await fetch(`/api/drive-download/${encodeURIComponent(modalCurrentFileId)}`, {
+          headers: getApiHeaders()
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        updateModalProgressUI(data);
+        if (data.status === 'completed' || data.status === 'error') {
+          stopModalDrivePolling();
+        }
+      } catch {}
+    }
+
+    function stopModalDrivePolling() {
+      if (modalDrivePollTimer) {
+        clearInterval(modalDrivePollTimer);
+        modalDrivePollTimer = null;
+      }
+    }
+
+    function updateModalProgressUI(data) {
+      const box = document.getElementById('modalDriveProgressBox');
+      box.style.display = 'flex';
+
+      const nameEl = document.getElementById('modalDriveFileName');
+      const pctEl = document.getElementById('modalDrivePct');
+      const fillEl = document.getElementById('modalDriveFill');
+      const statusEl = document.getElementById('modalDriveStatusText');
+      const sizeEl = document.getElementById('modalDriveSizeText');
+
+      const pct = data.progress || 0;
+      nameEl.textContent = `🎬 ${data.fileName || 'Video Google Drive'}`;
+      pctEl.textContent = `${pct}%`;
+      fillEl.style.width = `${pct}%`;
+
+      if (data.status === 'completed') {
+        fillEl.className = 'progress-fill completed';
+        pctEl.style.color = '#34d399';
+        statusEl.textContent = '✅ Đã tải hoàn tất 100% video từ Google Drive! Sẵn sàng phát Live.';
+        sizeEl.textContent = data.totalMB ? `${data.totalMB} MB` : '';
+      } else if (data.status === 'error') {
+        fillEl.className = 'progress-fill error';
+        pctEl.style.color = '#fb7185';
+        statusEl.textContent = `❌ ${data.error || 'Lỗi tải video từ Google Drive'}`;
+        sizeEl.textContent = '';
+      } else {
+        fillEl.className = 'progress-fill';
+        pctEl.style.color = '#60a5fa';
+        statusEl.textContent = '📥 Đang tải video từ Google Drive về máy...';
+        sizeEl.textContent = data.totalMB
+          ? `${data.downloadedMB} / ${data.totalMB} MB`
+          : `${data.downloadedMB || '0.00'} MB`;
+      }
+    }
+
+    // ========================================================================
+    // MODAL: ADD / EDIT STREAM
+    // ========================================================================
+
+    function openStreamModal() {
+      stopModalDrivePolling();
+      modalCurrentFileId = null;
+      document.getElementById('streamModalTitle').textContent = '➕ Thêm luồng Livestream mới';
+      document.getElementById('streamIdInput').value = '';
+      document.getElementById('streamNameInput').value = '';
+      document.getElementById('streamKeyInput').value = '';
+      document.getElementById('rtmpUrlInput').value = 'rtmp://a.rtmp.youtube.com/live2';
+      document.getElementById('driveLinkInput').value = '';
+      document.getElementById('loopCheckbox').checked = true;
+      document.getElementById('durationInput').value = '0';
+      document.getElementById('durationUnitInput').value = 'minutes';
+      document.getElementById('scheduledAtInput').value = '';
+      document.getElementById('encodeModeInput').value = 'transcode';
+      document.getElementById('btnSubmitStream').innerHTML = '▶ Bắt đầu';
+      document.getElementById('modalDriveProgressBox').style.display = 'none';
+
+      document.getElementById('streamModalBackdrop').classList.add('open');
+      document.getElementById('streamNameInput').focus();
+    }
+
+    function openEditStreamModal(id) {
+      const stream = allStreams.find(s => s.id === id);
+      if (!stream) return;
+
+      stopModalDrivePolling();
+      document.getElementById('streamModalTitle').textContent = '✏️ Chỉnh sửa cấu hình luồng';
+      document.getElementById('streamIdInput').value = stream.id;
+      document.getElementById('streamNameInput').value = stream.name;
+      document.getElementById('streamKeyInput').value = stream.streamKey;
+      document.getElementById('rtmpUrlInput').value = stream.rtmpUrl || 'rtmp://a.rtmp.youtube.com/live2';
+      document.getElementById('driveLinkInput').value = stream.driveLink;
+      document.getElementById('loopCheckbox').checked = Boolean(stream.loop);
+      document.getElementById('durationInput').value = stream.duration ?? 0;
+      document.getElementById('durationUnitInput').value = stream.durationUnit || 'minutes';
+      document.getElementById('encodeModeInput').value = stream.encodeMode || 'transcode';
+
+      if (stream.scheduledAt) {
+        const dt = new Date(stream.scheduledAt);
+        if (!isNaN(dt.getTime())) {
+          const tzOffset = dt.getTimezoneOffset() * 60000;
+          const localISOTime = new Date(dt.getTime() - tzOffset).toISOString().slice(0, 16);
+          document.getElementById('scheduledAtInput').value = localISOTime;
+        }
+      } else {
+        document.getElementById('scheduledAtInput').value = '';
+      }
+
+      document.getElementById('btnSubmitStream').innerHTML = '💾 Lưu & Chạy lại';
+      document.getElementById('streamModalBackdrop').classList.add('open');
+      triggerModalDriveDownload();
+    }
+
+    function closeStreamModal() {
+      stopModalDrivePolling();
+      document.getElementById('streamModalBackdrop').classList.remove('open');
+    }
+
+    function toggleRtmpAdvanced() {
+      const el = document.getElementById('rtmpUrlContainer');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleStreamKeyVisibility() {
+      const input = document.getElementById('streamKeyInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function setQuickSchedule(minutesFromNow) {
+      const input = document.getElementById('scheduledAtInput');
+      if (minutesFromNow <= 0) {
+        input.value = '';
+        updateSubmitButtonLabel();
+        return;
+      }
+      const target = new Date(Date.now() + minutesFromNow * 60000);
+      const tzOffset = target.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(target.getTime() - tzOffset).toISOString().slice(0, 16);
+      input.value = localISOTime;
+      updateSubmitButtonLabel();
+    }
+
+    document.getElementById('scheduledAtInput').addEventListener('change', updateSubmitButtonLabel);
+
+    function updateSubmitButtonLabel() {
+      const id = document.getElementById('streamIdInput').value;
+      if (id) return;
+      const schedVal = document.getElementById('scheduledAtInput').value;
+      const btn = document.getElementById('btnSubmitStream');
+      if (schedVal && new Date(schedVal).getTime() > Date.now()) {
+        btn.innerHTML = '📅 Đặt lịch & Bắt đầu';
+      } else {
+        btn.innerHTML = '▶ Bắt đầu';
+      }
+    }
+
+    async function handleSaveStream(e) {
+      e.preventDefault();
+      const id = document.getElementById('streamIdInput').value;
+      const schedVal = document.getElementById('scheduledAtInput').value;
+
+      const payload = {
+        name: document.getElementById('streamNameInput').value.trim(),
+        streamKey: document.getElementById('streamKeyInput').value.trim(),
+        rtmpUrl: document.getElementById('rtmpUrlInput').value.trim() || 'rtmp://a.rtmp.youtube.com/live2',
+        driveLink: document.getElementById('driveLinkInput').value.trim(),
+        loop: document.getElementById('loopCheckbox').checked,
+        duration: Number(document.getElementById('durationInput').value) || 0,
+        durationUnit: document.getElementById('durationUnitInput').value,
+        scheduledAt: schedVal ? new Date(schedVal).toISOString() : null,
+        encodeMode: document.getElementById('encodeModeInput').value,
+        startImmediately: true,
+        restartIfRunning: true
+      };
+
+      const btn = document.getElementById('btnSubmitStream');
+      btn.disabled = true;
+
+      try {
+        const url = id ? `/api/streams/${id}` : '/api/streams';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Có lỗi xảy ra khi lưu luồng.');
+          return;
+        }
+
+        closeStreamModal();
+        await fetchDashboardData();
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ========================================================================
+    // STREAM CONTROLS
+    // ========================================================================
+
+    async function startStream(id) {
+      try {
+        await fetch(`/api/streams/${id}/start`, { method: 'POST', headers: getApiHeaders() });
+        await fetchDashboardData();
+      } catch (err) {
+        alert('Lỗi khi bắt đầu luồng: ' + err.message);
+      }
+    }
+
+    async function stopStream(id) {
+      try {
+        await fetch(`/api/streams/${id}/stop`, { method: 'POST', headers: getApiHeaders() });
+        await fetchDashboardData();
+      } catch (err) {
+        alert('Lỗi khi dừng luồng: ' + err.message);
+      }
+    }
+
+    async function deleteStream(id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa luồng livestream này không?')) return;
+      try {
+        await fetch(`/api/streams/${id}`, { method: 'DELETE', headers: getApiHeaders() });
+        await fetchDashboardData();
+      } catch (err) {
+        alert('Lỗi khi xóa luồng: ' + err.message);
+      }
+    }
+
+    async function startAllStreams() {
+      if (allStreams.length === 0) return;
+      await fetch('/api/streams/start-all', { method: 'POST', headers: getApiHeaders() });
+      await fetchDashboardData();
+    }
+
+    async function stopAllStreams() {
+      if (allStreams.length === 0) return;
+      if (!confirm('Dừng tất cả các luồng đang phát và hủy các lịch đang chờ?')) return;
+      await fetch('/api/streams/stop-all', { method: 'POST', headers: getApiHeaders() });
+      await fetchDashboardData();
+    }
+
+    // ========================================================================
+    // LOG VIEWER MODAL & VPS GUIDE MODAL
+    // ========================================================================
+
+    function openLogModal(id, name) {
+      activeLogStreamId = id;
+      document.getElementById('logModalTitle').textContent = `📜 Nhật ký FFmpeg: ${name}`;
+      document.getElementById('logModalBackdrop').classList.add('open');
+      refreshCurrentLogs();
+      if (logPollInterval) clearInterval(logPollInterval);
+      logPollInterval = setInterval(refreshCurrentLogs, 1200);
+    }
+
+    function closeLogModal() {
+      document.getElementById('logModalBackdrop').classList.remove('open');
+      activeLogStreamId = null;
+      if (logPollInterval) {
+        clearInterval(logPollInterval);
+        logPollInterval = null;
+      }
+    }
+
+    async function refreshCurrentLogs() {
+      if (!activeLogStreamId) return;
+      try {
+        const res = await fetch(`/api/streams/${activeLogStreamId}/logs`, { headers: getApiHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          const el = document.getElementById('logConsoleOutput');
+          el.textContent = (data.logs || []).join('\n');
+          el.scrollTop = el.scrollHeight;
+        }
+      } catch {}
+    }
+
+    function openVpsGuideModal() {
+      document.getElementById('vpsModalBackdrop').classList.add('open');
+    }
+
+    function closeVpsGuideModal() {
+      document.getElementById('vpsModalBackdrop').classList.remove('open');
+    }
+
+    fetchDashboardData();
+    setInterval(fetchDashboardData, 1000);
+  </script>
+</body>
+</html>

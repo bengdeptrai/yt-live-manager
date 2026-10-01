@@ -1,0 +1,13 @@
+{
+  "name": "yt-live-manager",
+  "version": "1.0.0",
+  "description": "He thong May Ao quan ly Livestream YouTube da luong song song tu Google Drive",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "ffmpeg-static": "^5.3.0"
+  }
+}
